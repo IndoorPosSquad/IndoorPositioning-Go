@@ -1,0 +1,20 @@
+<script type="text/javascript" src="js/canvas3DGraph.js"></script>  
+<link href="css/style.css" type="text/css" rel="stylesheet"></link>
+<h1>Position</h1>
+
+<h2>{{.Msg}}</h2>
+<h3>{{.Xpos}} {{.Ypos}}</h3>
+<script>
+  var posX = {{.Xpos}};
+  var posY = {{.Ypos}};
+</script>
+<div id="g-holder">  
+    <div id="canvasDiv">  
+        <canvas id="graph" width="600" height="600" ></canvas>  
+        <div id="gInfo"></div>   
+    </div>  
+    <div id="controls">  
+    <!-- (put your controls here, if you need any) -->  
+    </div>  
+</div>  
+<script src="js/plot.js"></script>

@@ -65,7 +65,7 @@ func SockServer(ws *websocket.Conn) {
 	for {
 		time.Sleep(1000 * time.Millisecond)
 
-		msg := string(device.Getmsg_usb())
+		msg := string(device.GetmsgUSB())
 		p1_str := strings.Split(msg, " ")[0]
 		p2_str := strings.Split(msg, " ")[1]
 		fmt.Println("str:")

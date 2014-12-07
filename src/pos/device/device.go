@@ -25,7 +25,7 @@ func Close_usb() {
 
 }
 
-func Getmsg_usb() []byte {
+func GetmsgUSB() []byte {
 	msg := make([]byte, 8)
 	msg = []byte("400 400")
 	return msg

@@ -26,17 +26,14 @@ import (
 	"fmt"
 	"log"
 	. "math"
-	"strconv"
-	"strings"
-	"time"
+	//"strconv"
+	//"strings"
+	//"time"
 
-	"html/template"
-	"net/http"
-	"websocket"
+	"pos/server"
 
 	"gousb/usb"
-
-//"usbid"
+	//"usbid"
 )
 
 var (
@@ -50,9 +47,9 @@ var (
 	ctx      *usb.Context
 	devs     []usb.Device
 
-	JSON          = websocket.JSON           // codec for JSON
-	Message       = websocket.Message        // codec for string, []byte
-	ActiveClients = make(map[ClientConn]int) // map containing clients
+	//JSON          = websocket.JSON           // codec for JSON
+	//Message       = websocket.Message        // codec for string, []byte
+	//ActiveClients = make(map[ClientConn]int) // map containing clients
 
 	x_tmp = float64(0)
 	y_tmp = float64(0)
@@ -63,17 +60,6 @@ var (
 	ps  = [][]float64{{0.0, 0.0}, {500.0, 0.0}}
 	rec = [][]float64{{0.0, 0.0}, {0.0, 0.0}}
 )
-
-type Page struct {
-	Msg  string
-	Xpos float64
-	Ypos float64
-}
-
-type ClientConn struct {
-	websocket *websocket.Conn
-	clientIP  string
-}
 
 func usb_getmsg() []byte {
 	flag.Parse()
@@ -218,87 +204,88 @@ func solve_2d(
 	reciever[1][1] += origin[1]
 }
 
-func SockServer(ws *websocket.Conn) {
-	var err error
-	var clientMessage string
-	// use []byte if websocket binary type is blob or arraybuffer
-	// var clientMessage []byte
-	// cleanup on server side
-	defer func() {
-		if err = ws.Close(); err != nil {
-			log.Println("Websocket could not be closed", err.Error())
-		}
-	}()
-	client := ws.Request().RemoteAddr
-	log.Println("Client connected:", client)
-	sockCli := ClientConn{ws, client}
-	ActiveClients[sockCli] = 0
-	log.Println(
-		"Number of clients connected ...",
-		len(ActiveClients))
-
-	for {
-		time.Sleep(1000 * time.Millisecond)
-
-		msg := string(usb_getmsg())
-		p1_str := strings.Split(msg, " ")[0]
-		p2_str := strings.Split(msg, " ")[1]
-		fmt.Println("str:")
-		fmt.Println(p1_str, p2_str)
-
-		p1_flt, _ := strconv.ParseFloat(p1_str, 64)
-		p2_flt, _ := strconv.ParseFloat(p2_str, 64)
-
-		p1_flt += 60
-		p2_flt += 00
-
-		fmt.Println("flt:")
-		fmt.Println(p1_flt, p2_flt)
-
-		fmt.Println("rec")
-		solve_2d(rec, ps, p1_flt, p2_flt)
-
-		fmt.Println(rec)
-
-		clientMessage =
-			strconv.FormatFloat(rec[0][0], 'g', 6, 64) +
-				"," +
-				strconv.FormatFloat(rec[0][1], 'g', 6, 64)
-
-		for cs, _ := range ActiveClients {
-			if err = Message.Send(
-				cs.websocket,
-				clientMessage); err != nil {
-				// we could not send the message to a peer
-				log.Println(
-					"Could not send message to ",
-					cs.clientIP,
-					err.Error())
-			}
-		}
-	}
-}
-
-func requestHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("calllll")
-	param := r.URL.Path
-	fmt.Println(param)
-	t, _ := template.ParseFiles("index.html")
-	p := &Page{Msg: string(usb_getmsg()), Xpos: 0, Ypos: 0}
-	t.Execute(w, p)
-}
+//func SockServer(ws *websocket.Conn) {
+	//var err error
+	//var clientMessage string
+	//// use []byte if websocket binary type is blob or arraybuffer
+	//// var clientMessage []byte
+	//// cleanup on server side
+	//defer func() {
+		//if err = ws.Close(); err != nil {
+			//log.Println("Websocket could not be closed", err.Error())
+		//}
+	//}()
+	//client := ws.Request().RemoteAddr
+	//log.Println("Client connected:", client)
+	//sockCli := ClientConn{ws, client}
+	//ActiveClients[sockCli] = 0
+	//log.Println(
+		//"Number of clients connected ...",
+		//len(ActiveClients))
+//
+	//for {
+		//time.Sleep(1000 * time.Millisecond)
+//
+		//msg := string(usb_getmsg())
+		//p1_str := strings.Split(msg, " ")[0]
+		//p2_str := strings.Split(msg, " ")[1]
+		//fmt.Println("str:")
+		//fmt.Println(p1_str, p2_str)
+//
+		//p1_flt, _ := strconv.ParseFloat(p1_str, 64)
+		//p2_flt, _ := strconv.ParseFloat(p2_str, 64)
+//
+		//p1_flt += 60
+		//p2_flt += 00
+//
+		//fmt.Println("flt:")
+		//fmt.Println(p1_flt, p2_flt)
+//
+		//fmt.Println("rec")
+		//solve_2d(rec, ps, p1_flt, p2_flt)
+//
+		//fmt.Println(rec)
+//
+		//clientMessage =
+			//strconv.FormatFloat(rec[0][0], 'g', 6, 64) +
+				//"," +
+				//strconv.FormatFloat(rec[0][1], 'g', 6, 64)
+//
+		//for cs, _ := range ActiveClients {
+			//if err = Message.Send(
+				//cs.websocket,
+				//clientMessage); err != nil {
+				//// we could not send the message to a peer
+				//log.Println(
+					//"Could not send message to ",
+					//cs.clientIP,
+					//err.Error())
+			//}
+		//}
+	//}
+//}
+//
+//func requestHandler(w http.ResponseWriter, r *http.Request) {
+	//fmt.Println("calllll")
+	//param := r.URL.Path
+	//fmt.Println(param)
+	//t, _ := template.ParseFiles("index.html")
+	//p := &Page{Msg: string(usb_getmsg()), Xpos: 0, Ypos: 0}
+	//t.Execute(w, p)
+//}
 
 func main() {
 	for i := 0; i < 5; i++ {
-		fmt.Println(usb_getmsg())
+		//fmt.Println(usb_getmsg())
 	}
-	http.Handle("/js/",
-		http.StripPrefix("/js/",
-			http.FileServer(http.Dir("./js"))))
-	http.Handle("/css/",
-		http.StripPrefix("/css/",
-			http.FileServer(http.Dir("./css"))))
-	http.Handle("/sock", websocket.Handler(SockServer))
-	http.HandleFunc("/", requestHandler)
-	http.ListenAndServe("localhost:2000", nil)
+	//http.Handle("/js/",
+		//http.StripPrefix("/js/",
+			//http.FileServer(http.Dir("./js"))))
+	//http.Handle("/css/",
+		//http.StripPrefix("/css/",
+			//http.FileServer(http.Dir("./css"))))
+	//http.Handle("/sock", websocket.Handler(SockServer))
+	//http.HandleFunc("/", requestHandler)
+	//http.ListenAndServe("localhost:2000", nil)
+	server.Init(2000)
 }

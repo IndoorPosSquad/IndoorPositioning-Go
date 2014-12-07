@@ -17,11 +17,11 @@ var (
 	devs     []usb.Device
 )
 
-func Init_usb(id string) {
+func InitUSB(id string) {
 	
 }
 
-func Close_usb() {
+func CloseUSB() {
 
 }
 

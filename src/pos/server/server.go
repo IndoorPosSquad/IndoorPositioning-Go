@@ -4,17 +4,30 @@ import (
 	"fmt"
 	"time"
 	"strconv"
+	"strings"
 	"os"
 
 	"html/template"
 	"net/http"
 	"websocket"
+	
+	"pos/positioning"
+	"pos/device"
 )
 
 var (
 	JSON          = websocket.JSON           // codec for JSON
 	Message       = websocket.Message        // codec for string, []byte
 	ActiveClients = make(map[ClientConn]int) // map containing clients
+
+	x_tmp = float64(0)
+	y_tmp = float64(0)
+
+	prange1 = float64(0)
+	prange2 = float64(0)
+
+	ps  = [][]float64{{0.0, 0.0}, {500.0, 0.0}}
+	rec = [][]float64{{0.0, 0.0}, {0.0, 0.0}}
 )
 
 type Page struct {
@@ -34,11 +47,13 @@ func SockServer(ws *websocket.Conn) {
 	// use []byte if websocket binary type is blob or arraybuffer
 	// var clientMessage []byte
 	// cleanup on server side
+
 	defer func() {
 		if err = ws.Close(); err != nil {
 			fmt.Println("Websocket could not be closed", err.Error())
 		}
 	}()
+
 	client := ws.Request().RemoteAddr
 	fmt.Println("Client connected:", client)
 	sockCli := ClientConn{ws, client}
@@ -50,31 +65,31 @@ func SockServer(ws *websocket.Conn) {
 	for {
 		time.Sleep(1000 * time.Millisecond)
 
-		//msg := string(usb_getmsg())
-		//p1_str := strings.Split(msg, " ")[0]
-		//p2_str := strings.Split(msg, " ")[1]
-		//fmt.Println("str:")
-		//fmt.Println(p1_str, p2_str)
-//
-		//p1_flt, _ := strconv.ParseFloat(p1_str, 64)
-		//p2_flt, _ := strconv.ParseFloat(p2_str, 64)
-//
-		//p1_flt += 60
-		//p2_flt += 00
-//
-		//fmt.Println("flt:")
-		//fmt.Println(p1_flt, p2_flt)
-//
-		//fmt.Println("rec")
-		//solve_2d(rec, ps, p1_flt, p2_flt)
-//
-		//fmt.Println(rec)
-//
-		//clientMessage =
-			//strconv.FormatFloat(rec[0][0], 'g', 6, 64) +
-				//"," +
-				//strconv.FormatFloat(rec[0][1], 'g', 6, 64)
-		clientMessage = "test"
+		msg := string(device.Getmsg_usb())
+		p1_str := strings.Split(msg, " ")[0]
+		p2_str := strings.Split(msg, " ")[1]
+		fmt.Println("str:")
+		fmt.Println(p1_str, p2_str)
+
+		p1_flt, _ := strconv.ParseFloat(p1_str, 64)
+		p2_flt, _ := strconv.ParseFloat(p2_str, 64)
+
+		p1_flt += 60
+		p2_flt += 00
+
+		fmt.Println("flt:")
+		fmt.Println(p1_flt, p2_flt)
+
+		fmt.Println("rec")
+		positioning.Solve_2d(rec, ps, p1_flt, p2_flt)
+
+		fmt.Println(rec)
+
+		clientMessage =
+			strconv.FormatFloat(rec[0][0], 'g', 6, 64) +
+				"," +
+				strconv.FormatFloat(rec[0][1], 'g', 6, 64)
+		//clientMessage = "test"
 
 		for cs, _ := range ActiveClients {
 			if err = Message.Send(

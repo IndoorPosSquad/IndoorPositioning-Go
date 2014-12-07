@@ -81,7 +81,7 @@ func SockServer(ws *websocket.Conn) {
 		fmt.Println(p1_flt, p2_flt)
 
 		fmt.Println("rec")
-		positioning.Solve_2d(rec, ps, p1_flt, p2_flt)
+		positioning.Solve2d(rec, ps, p1_flt, p2_flt)
 
 		fmt.Println(rec)
 

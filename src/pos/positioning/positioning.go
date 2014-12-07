@@ -20,7 +20,7 @@ func fabs(x float64) float64 {
 	}
 }
 
-func Solve_2d(
+func Solve2d(
 	reciever [][]float64,
 	pseudolites [][]float64,
 	pranges1 float64,
@@ -35,13 +35,6 @@ func Solve_2d(
 	var h1 float64
 	var invrotation [2][2]float64
 	var pranges [2]float64
-
-	//fmt.Printf("\nPseudolites\n%f %f %f %f\n",
-		//pseudolites[0][0],
-		//pseudolites[0][1],
-		//pseudolites[1][0],
-		//pseudolites[1][1])
-	//fmt.Printf("\npr1 %f pr2 %f\n", pranges1, pranges2)
 
 	pranges[0] = pranges1
 	pranges[1] = pranges2

@@ -74,9 +74,6 @@ func SockServer(ws *websocket.Conn) {
 		p1_flt, _ := strconv.ParseFloat(p1_str, 64)
 		p2_flt, _ := strconv.ParseFloat(p2_str, 64)
 
-		p1_flt += 60
-		p2_flt += 00
-
 		fmt.Println("flt:")
 		fmt.Println(p1_flt, p2_flt)
 

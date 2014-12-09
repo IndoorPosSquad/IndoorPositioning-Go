@@ -20,9 +20,10 @@ var (
 	setup        = flag.Int("setup", 0, "Endpoint to which to connect")
 	endpoint     = flag.Int("endpoint", 1, "Endpoint to which to connect")
 	debug        = flag.Int("debug", 3, "Debug level for libusb")
-	ep_bulk_read usb.Endpoint
+
 	ctx          *usb.Context
 	devs         []*usb.Device
+	ep_bulk_read usb.Endpoint
 )
 
 func InitUSB() {
@@ -79,21 +80,24 @@ func CloseUSB() {
 	}()
 }
 
-func GetmsgUSB() []byte {
-	//InitUSB()
-	//defer CloseUSB()
-
+func GetDistanceUSB() (float64, float64) {
+	// read distance from device
 	buf := make([]byte, 64)
-	for i := 0; i < 64; i++ {
-		buf[i] = 0
-	}
-
-	log.Println("Ready to read from Device")
 	ep_bulk_read.Read(buf)
+
+	// get the message out of buffer
 	n := bytes.IndexByte(buf, byte(0))
 	buf = buf[:n]
+	
+	distances := string(buf)
+
+	d1_str := strings.Split(msg, " ")[0]
+	d2_str := strings.Split(msg, " ")[1]
+
+	d1_flt, _ := strconv.ParseFloat(d1_str, 64)
+	d2_flt, _ := strconv.ParseFloat(d2_str, 64)
 
 	fmt.Println(string(buf))
 	//fmt.Printf("%c\n", buf)
-	return buf
+	return d1_flt, d2_flt
 }

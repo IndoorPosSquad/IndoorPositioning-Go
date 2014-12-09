@@ -20,12 +20,6 @@ var (
 	Message       = websocket.Message        // codec for string, []byte
 	ActiveClients = make(map[ClientConn]int) // map containing clients
 
-	x_tmp = float64(0)
-	y_tmp = float64(0)
-
-	prange1 = float64(0)
-	prange2 = float64(0)
-
 	ps  = [][]float64{{0.0, 0.0}, {500.0, 0.0}}
 	rec = [][]float64{{0.0, 0.0}, {0.0, 0.0}}
 )
@@ -65,14 +59,7 @@ func SockServer(ws *websocket.Conn) {
 	for {
 		time.Sleep(1000 * time.Millisecond)
 
-		msg := string(device.GetmsgUSB())
-		p1_str := strings.Split(msg, " ")[0]
-		p2_str := strings.Split(msg, " ")[1]
-		fmt.Println("str:")
-		fmt.Println(p1_str, p2_str)
-
-		p1_flt, _ := strconv.ParseFloat(p1_str, 64)
-		p2_flt, _ := strconv.ParseFloat(p2_str, 64)
+		p1_flt, p2_flt := device.GetDistanceUSB()
 
 		fmt.Println("flt:")
 		fmt.Println(p1_flt, p2_flt)

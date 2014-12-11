@@ -8,7 +8,7 @@ import (
 
 	"html/template"
 	"net/http"
-	"websocket"
+	"pkg/websocket"
 	
 	"pos/positioning"
 	"pos/device"

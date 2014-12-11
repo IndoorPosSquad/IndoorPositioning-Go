@@ -9,8 +9,10 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"strings"
+	"strconv"
 
-	"gousb/usb"
+	"github.com/JohnFarmer/gousb/usb"
 )
 
 var (
@@ -18,12 +20,14 @@ var (
 	config       = flag.Int("config", 1, "Endpoint to which to connect")
 	iface        = flag.Int("interface", 0, "Endpoint to which to connect")
 	setup        = flag.Int("setup", 0, "Endpoint to which to connect")
-	endpoint     = flag.Int("endpoint", 1, "Endpoint to which to connect")
+	endpoint_bulk_read     = flag.Int("endpoint_bulk_read", 1, "Endpoint to which to connect")
+	endpoint_bulk_write     = flag.Int("endpoint_bulk_write", 1, "Endpoint to which to connect")
 	debug        = flag.Int("debug", 3, "Debug level for libusb")
 
 	ctx          *usb.Context
 	devs         []*usb.Device
 	ep_bulk_read usb.Endpoint
+	ep_bulk_write usb.Endpoint
 )
 
 func InitUSB() {
@@ -37,31 +41,21 @@ func InitUSB() {
 
 	log.Printf("Scanning for device %q...", *device)
 
-	// ListDevices is used to find the devices to open.
-	devs, err = ctx.ListDevices(func(desc *usb.Descriptor) bool {
-		if fmt.Sprintf("%s:%s", desc.Vendor, desc.Product) != *device {
-			return false
-		}
-		return true
-	})
+	dev, _ := ctx.GetDeviceWithVidPid(*device)
 
-	if err != nil {
-		log.Fatalf("list: %s", err)
-	}
-
-	if len(devs) == 0 {
-		log.Fatalf("no devices found")
-	}
-
-	dev := devs[0]
-
-	//log.Printf("Connecting to endpoint...")
-	//log.Printf("- %#v", dev.Descriptor)
+	// Open up two ep for read and write
 	ep_bulk_read, err = dev.OpenEndpoint(
 		uint8(*config),
 		uint8(*iface),
 		uint8(*setup),
-		uint8(*endpoint)|uint8(usb.ENDPOINT_DIR_IN))
+		uint8(*endpoint_bulk_read)|uint8(usb.ENDPOINT_DIR_IN))
+
+	ep_bulk_write, err = dev.OpenEndpoint(
+		uint8(*config),
+		uint8(*iface),
+		uint8(*setup),
+		uint8(*endpoint_bulk_write)|uint8(usb.ENDPOINT_DIR_OUT))
+	_ = ep_bulk_write
 
 	if err != nil {
 		log.Fatalf("open: %s", err)
@@ -91,8 +85,8 @@ func GetDistanceUSB() (float64, float64) {
 	
 	distances := string(buf)
 
-	d1_str := strings.Split(msg, " ")[0]
-	d2_str := strings.Split(msg, " ")[1]
+	d1_str := strings.Split(distances, " ")[0]
+	d2_str := strings.Split(distances, " ")[1]
 
 	d1_flt, _ := strconv.ParseFloat(d1_str, 64)
 	d2_flt, _ := strconv.ParseFloat(d2_str, 64)
@@ -100,4 +94,8 @@ func GetDistanceUSB() (float64, float64) {
 	fmt.Println(string(buf))
 	//fmt.Printf("%c\n", buf)
 	return d1_flt, d2_flt
+}
+
+func SendCommnadUSB(command string) {
+	// TODO add a command hash/table
 }

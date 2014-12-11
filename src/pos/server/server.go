@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"time"
 	"strconv"
-	"strings"
 	"os"
 
 	"html/template"

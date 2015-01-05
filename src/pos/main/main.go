@@ -22,13 +22,13 @@ import "C"
 
 import (
 	"pos/server"
-	"pos/device"
+	//"pos/device"
 )
 
 func main() {
 	// device configs
-	device.InitUSB()
-	defer device.CloseUSB()
+	//device.InitUSB()
+	//defer device.CloseUSB()
 	//server.GetmsgFunc = device.GetmsgUSB
 
 	server.Init(2000)

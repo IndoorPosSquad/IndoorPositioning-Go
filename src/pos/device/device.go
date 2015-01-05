@@ -5,12 +5,12 @@ package device
 import "C"
 
 import (
-	"bytes"
 	"flag"
-	"fmt"
 	"log"
-	"strings"
-	"strconv"
+	//"bytes"
+	//"fmt"
+	//"strconv"
+	//"strings"
 
 	"github.com/JohnFarmer/gousb/usb"
 )
@@ -75,25 +75,25 @@ func CloseUSB() {
 }
 
 func GetDistanceUSB() (float64, float64) {
-	// read distance from device
-	buf := make([]byte, 64)
-	ep_bulk_read.Read(buf)
-
-	// get the message out of buffer
-	n := bytes.IndexByte(buf, byte(0))
-	buf = buf[:n]
-	
-	distances := string(buf)
-
-	d1_str := strings.Split(distances, " ")[0]
-	d2_str := strings.Split(distances, " ")[1]
-
-	d1_flt, _ := strconv.ParseFloat(d1_str, 64)
-	d2_flt, _ := strconv.ParseFloat(d2_str, 64)
-
-	fmt.Println(string(buf))
-	//fmt.Printf("%c\n", buf)
-	return d1_flt, d2_flt
+	//// read distance from device
+	//buf := make([]byte, 64)
+	//ep_bulk_read.Read(buf)
+//
+	//// get the message out of buffer
+	//n := bytes.IndexByte(buf, byte(0))
+	//buf = buf[:n]
+//	
+	//distances := string(buf)
+//
+	//d1_str := strings.Split(distances, " ")[0]
+	//d2_str := strings.Split(distances, " ")[1]
+//
+	//d1_flt, _ := strconv.ParseFloat(d1_str, 64)
+	//d2_flt, _ := strconv.ParseFloat(d2_str, 64)
+//
+	//fmt.Println(string(buf))
+	////fmt.Printf("%c\n", buf)
+	return 403.0, 500.0
 }
 
 func SendCommnadUSB(command string) {

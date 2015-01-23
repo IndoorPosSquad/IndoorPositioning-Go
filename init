@@ -1,0 +1,4 @@
+window="localhost:2000 - Chromium"
+chromium http://localhost:2000 &
+sleep 2
+wmctrl -r $window -b add,fullscreen

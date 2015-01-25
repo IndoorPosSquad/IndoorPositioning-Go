@@ -28,6 +28,10 @@ var (
 	devs         []*usb.Device
 	ep_bulk_read usb.Endpoint
 	ep_bulk_write usb.Endpoint
+	
+	// test variables
+	count = 0.0
+	step = 1
 )
 
 func InitUSB() {
@@ -55,7 +59,6 @@ func InitUSB() {
 		uint8(*iface),
 		uint8(*setup),
 		uint8(*endpoint_bulk_write)|uint8(usb.ENDPOINT_DIR_OUT))
-	_ = ep_bulk_write
 
 	if err != nil {
 		log.Fatalf("open: %s", err)
@@ -93,7 +96,18 @@ func GetDistanceUSB() (float64, float64) {
 //
 	//fmt.Println(string(buf))
 	////fmt.Printf("%c\n", buf)
-	return 403.0, 500.0
+
+	if step > 0 && count <= 100.0 {
+		count += 1.0
+	} else if step < 0 && count >= -100.0 {
+		count -= 1.0
+	} else if count >= 100.0 {
+		step = -1
+	} else if count <= -100.0 {
+		step = 1
+	}
+
+	return 300.0 + count , 300.0 - count
 }
 
 func SendCommnadUSB(command string) {

@@ -3,7 +3,14 @@
 This is the USB host part of an UWB based indoor positioning program.
 ~~~
          SPI           USB
-DWM1000 <===> STM32F1 <===> Linux
+DWM1000 <===> STM32F1 <===> Host Software
+~~~
+
+~~~
+Host Software:
+
+Device Interface <===> Processing <===> Front End
+|----------- Golang ------------|      |- Web -|
 ~~~
 
 Build:

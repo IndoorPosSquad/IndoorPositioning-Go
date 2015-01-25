@@ -2,10 +2,12 @@ package server
 
 import (
 	"fmt"
+	"log"
 	"time"
 	"strconv"
 	"os"
 
+	"encoding/json"
 	"html/template"
 	"net/http"
 	"pkg/websocket"
@@ -34,52 +36,52 @@ type ClientConn struct {
 	clientIP  string
 }
 
+type TxMsg struct {
+	Xpos float64 `json:"x"`
+	Ypos float64 `json:"y"`
+}
+
 func SockServer(ws *websocket.Conn) {
 	var err error
-	var clientMessage string
 	// use []byte if websocket binary type is blob or arraybuffer
 	// var clientMessage []byte
 	// cleanup on server side
 
 	defer func() {
 		if err = ws.Close(); err != nil {
-			fmt.Println("Websocket could not be closed", err.Error())
+			log.Println("Websocket could not be closed",
+				err.Error())
 		}
 	}()
 
 	client := ws.Request().RemoteAddr
-	fmt.Println("Client connected:", client)
 	sockCli := ClientConn{ws, client}
 	ActiveClients[sockCli] = 0
-	fmt.Println(
-		"Number of clients connected ...",
-		len(ActiveClients))
 
 	for {
-		time.Sleep(1000 * time.Millisecond)
+		time.Sleep(50 * time.Millisecond)
 
 		p1_flt, p2_flt := device.GetDistanceUSB()
-
-		fmt.Println("flt:")
-		fmt.Println(p1_flt, p2_flt)
-
-		fmt.Println("rec")
 		positioning.Solve2d(rec, ps, p1_flt, p2_flt)
 
-		fmt.Println(rec)
+		txMsgStruct := TxMsg{rec[0][0], rec[0][1]}
+		byteTxMsgJSON, err := json.Marshal(txMsgStruct)
+		// []byte -> string
+		if err != nil {
+			log.Println("ERROR parsing: ", err)
+			log.Println("         data: ", p1_flt, p2_flt)
+			continue;
+		}
 
-		clientMessage =
-			strconv.FormatFloat(rec[0][0], 'g', 6, 64) +
-				"," +
-				strconv.FormatFloat(rec[0][1], 'g', 6, 64)
-		//clientMessage = "test"
+		txMsg := string(byteTxMsgJSON)
+		log.Println(txMsg)
 
 		for cs, _ := range ActiveClients {
 			if err = Message.Send(
 				cs.websocket,
-				clientMessage); err != nil {
+				txMsg); err != nil {
 				// we could not send the message to a peer
-				fmt.Println(
+				log.Println(
 					"Could not send message to ",
 					cs.clientIP,
 					err.Error())
@@ -89,17 +91,16 @@ func SockServer(ws *websocket.Conn) {
 }
 
 func RequestHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println(os.Getwd())
+	log.Println(os.Getwd())
 	fmt.Fprintf(w, "<h1>%s</h1>", "test")
 	param := r.URL.Path
-	fmt.Println(param)
+	log.Println(param)
 	t, _ := template.ParseFiles("./src/pos/server/index.html")
 	p := &Page{Msg: strconv.Itoa(1234), Xpos: 0, Ypos: 0}
 	t.Execute(w, p)
 }
 
 func Init(port int) {
-	fmt.Println(port)
 	http.Handle("/js/",
 		http.StripPrefix("/js/",
 			http.FileServer(http.Dir("./src/pos/server/js"))))
@@ -108,8 +109,8 @@ func Init(port int) {
 			http.FileServer(http.Dir("./src/pos/server/css"))))
 	http.Handle("/sock", websocket.Handler(SockServer))
 	http.HandleFunc("/", RequestHandler)
-	fmt.Println("localhost:" + strconv.Itoa(port))
+	log.Println("localhost:" + strconv.Itoa(port))
 	http.ListenAndServe("localhost:" + strconv.Itoa(port), nil)
-	fmt.Println("end of socket server init")
+	log.Println("end of socket server init")
 	//for {}
 }

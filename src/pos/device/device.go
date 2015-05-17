@@ -1,18 +1,9 @@
 package device
 
-// #cgo LDFLAGS: -lusb-1.0
-// #include <libusb-1.0/libusb.h>
-import "C"
-
 import (
 	"flag"
 	"log"
-	//"bytes"
-	//"fmt"
-	//"strconv"
-	//"strings"
-
-	"github.com/JohnFarmer/gousb/usb"
+	"github.com/kylelemons/gousb/usb"
 )
 
 var (
@@ -21,18 +12,24 @@ var (
 	iface        = flag.Int("interface", 0, "Endpoint to which to connect")
 	setup        = flag.Int("setup", 0, "Endpoint to which to connect")
 	endpoint_bulk_read     = flag.Int("endpoint_bulk_read", 1, "Endpoint to which to connect")
-	endpoint_bulk_write     = flag.Int("endpoint_bulk_write", 1, "Endpoint to which to connect")
+	endpoint_int_read     = flag.Int("endpoint_int_read", 2, "Endpoint to which to connect")
+	endpoint_bulk_write     = flag.Int("endpoint_bulk_write", 3, "Endpoint to which to connect")
 	debug        = flag.Int("debug", 3, "Debug level for libusb")
 
 	ctx          *usb.Context
 	devs         []*usb.Device
 	ep_bulk_read usb.Endpoint
 	ep_bulk_write usb.Endpoint
-	
-	// test variables
-	count = 0.0
-	step = 1
+	ep_int_read usb.Endpoint
 )
+
+type DWM1k interface {
+	Read(b []byte) (int, error)
+	Write(b []byte) (int, error)
+	ep_bulk_read usb.Endpoint
+	ep_bulk_write usb.Endpoint
+	ep_int_read usb.Endpoint
+}
 
 func InitUSB() {
 	var err error
@@ -78,36 +75,13 @@ func CloseUSB() {
 }
 
 func GetDistanceUSB() (float64, float64) {
-	//// read distance from device
-	//buf := make([]byte, 64)
-	//ep_bulk_read.Read(buf)
-//
-	//// get the message out of buffer
-	//n := bytes.IndexByte(buf, byte(0))
-	//buf = buf[:n]
-//	
-	//distances := string(buf)
-//
-	//d1_str := strings.Split(distances, " ")[0]
-	//d2_str := strings.Split(distances, " ")[1]
-//
-	//d1_flt, _ := strconv.ParseFloat(d1_str, 64)
-	//d2_flt, _ := strconv.ParseFloat(d2_str, 64)
-//
-	//fmt.Println(string(buf))
-	////fmt.Printf("%c\n", buf)
+	// read distance from device
+	buf := make([]byte, 64)
+	ep_bulk_read.Read(buf)
 
-	if step > 0 && count <= 100.0 {
-		count += 1.0
-	} else if step < 0 && count >= -100.0 {
-		count -= 1.0
-	} else if count >= 100.0 {
-		step = -1
-	} else if count <= -100.0 {
-		step = 1
-	}
-
-	return 300.0 + count , 300.0 - count
+	// get the message out of buffer
+	n := bytes.IndexByte(buf, byte(0))
+	buf = buf[:n]
 }
 
 func SendCommnadUSB(command string) {
